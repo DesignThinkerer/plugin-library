@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<channel>
+  <atom:link href="https://DesignThinkerer.github.io/plugin-library/xml.rss" rel="self" type="application/rss+xml" />
+  <title>Tiddlyhost Plugin Library</title>
+  <link>https://plugin-library.tiddlyhost.com/</link>
+  <description>Feedbacks: <a href="https://talk.tiddlywiki.org/t/how-to-create-a-plugin-library-with-one-click-tiddlyhost/11245/3">talk.tiddlywiki.org</a></description>
+  <language>en-GB</language>
+  <lastBuildDate>Fri, 21 Aug 2026 22:32:18 GMT</lastBuildDate>
+  
+</channel>
+</rss>
