@@ -2,19 +2,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel>
   <atom:link href="https://DesignThinkerer.github.io/plugin-library/xml.rss" rel="self" type="application/rss+xml" />
-  <title><![CDATA[Tiddlyhost Plugin Library]]</title>
+  <title><![CDATA[Tiddlyhost Plugin Library]]></title>
   <link>https://plugin-library.tiddlyhost.com/</link>
-  <description><![CDATA[Feedbacks: <a href="https://talk.tiddlywiki.org/t/how-to-create-a-plugin-library-with-one-click-tiddlyhost/11245/3">talk.tiddlywiki.org</a>]]</description>
+  <description>a non-linear personal web notebook</description>
   <language>en-GB</language>
-  <lastBuildDate>Fri, 21 Aug 2026 23:16:11 GMT</lastBuildDate>
+  <lastBuildDate>Fri, 21 Aug 2026 23:41:47 GMT</lastBuildDate>
   <item>
-      <title><![CDATA[Announcing the RSS Feed Plugin]]></title>
+      <title>Announcing the RSS Feed Plugin</title>
       <category>feed</category>
-      <description><![CDATA[]]></description>
+      <description></description>
       <content:encoded><![CDATA[<p>I am excited to announce the release of a <a class="tc-tiddlylink tc-tiddlylink-resolves" href="https://plugin-library.tiddlyhost.com/#%24%3A%2Fplugins%2Ftheophile.dev%2Frss-feed"><span class="tc-titlebar tc-tiddler-title-icon" style="fill:var(--tpc-tiddler-link-foreground);font-size:1em;"></span>new plugin</a> designed to allow your audience to follow your wiki. This new tool automatically generates a valid RSS 2.0 feed directly from your specified tiddlers and pushes the file from your wiki, straight to GitHub.</p>]]></content:encoded>
 	  <pubDate>Fri, 21 Aug 2026 23:08:38 GMT</pubDate>
       <link>https://plugin-library.tiddlyhost.com/#Announcing%20the%20RSS%20Feed%20Plugin</link>
-      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:[created[20260821223324326]]</guid>
+      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260821223324326%5D%5D</guid>
 </item>
 </channel>
 </rss>
