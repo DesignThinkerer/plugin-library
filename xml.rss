@@ -6,15 +6,15 @@
   <link>https://plugin-library.tiddlyhost.com/</link>
   <description>Feedbacks: <a href="https://talk.tiddlywiki.org/t/how-to-create-a-plugin-library-with-one-click-tiddlyhost/11245/3">talk.tiddlywiki.org</a></description>
   <language>en-GB</language>
-  <lastBuildDate>Fri, 21 Aug 2026 22:39:05 GMT</lastBuildDate>
+  <lastBuildDate>Fri, 21 Aug 2026 22:47:48 GMT</lastBuildDate>
   <item>
-      <title><![CDATA[New plugin: RSS Feed]]></title>
+      <title><![CDATA[Announcing My New RSS Feed Plugin]]></title>
       <category>feed</category>
       <description><![CDATA[]]></description>
-      <content:encoded><![CDATA[<p>The <a class="tc-tiddlylink tc-tiddlylink-resolves" href="https://plugin-library.tiddlyhost.com/#%24%3A%2Fplugins%2Ftheophile.dev%2Frss-feed"><span class="tc-titlebar tc-tiddler-title-icon" style="fill:var(--tpc-tiddler-link-foreground);font-size:1em;"></span>RSS Feed plugin</a> use github page to create a personnal feed for your wiki.</p>]]></content:encoded>
-	  <pubDate>Fri, 21 Aug 2026 22:38:51 GMT</pubDate>
-      <link>https://plugin-library.tiddlyhost.com/#New%20plugin%3A%20RSS%20Feed</link>
-      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#New%20plugin%3A%20RSS%20Feed</guid>
+      <content:encoded><![CDATA[<p>I am excited to announce the release of a new plugin designed to allow your audience to follow your wiki. This new tool automatically generates a valid RSS 2.0 feed directly from your specified tiddlers and pushes the file from your wiki, straight to GitHub.</p>]]></content:encoded>
+	  <pubDate>Fri, 21 Aug 2026 22:44:54 GMT</pubDate>
+      <link>https://plugin-library.tiddlyhost.com/#Announcing%20My%20New%20RSS%20Feed%20Plugin</link>
+      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#Announcing%20My%20New%20RSS%20Feed%20Plugin</guid>
 </item>
 </channel>
 </rss>
