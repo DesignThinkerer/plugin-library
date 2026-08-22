@@ -6,15 +6,15 @@
   <link>https://plugin-library.tiddlyhost.com/</link>
   <description>a non-linear personal web notebook</description>
   <language>en-GB</language>
-  <lastBuildDate>Sat, 22 Aug 2026 13:02:24 GMT</lastBuildDate>
+  <lastBuildDate>Sat, 22 Aug 2026 13:04:35 GMT</lastBuildDate>
   <item>
-      <title>Something new to the feed</title>
+      <title>Testing</title>
       <category>feed</category>
       <description></description>
-      <content:encoded><![CDATA[]]></content:encoded>
-	  <pubDate>Sat, 22 Aug 2026 13:01:50 GMT</pubDate>
-      <link>https://plugin-library.tiddlyhost.com/#Something%20new%20to%20the%20feed</link>
-      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260822130136861%5D%5D</guid>
+      <content:encoded><![CDATA[<p>just a test for the feed</p>]]></content:encoded>
+	  <pubDate>Sat, 22 Aug 2026 13:04:35 GMT</pubDate>
+      <link>https://plugin-library.tiddlyhost.com/#Testing</link>
+      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260822130417265%5D%5D</guid>
 </item><item>
       <title>Announcing the RSS Feed Plugin</title>
       <category>feed</category>
