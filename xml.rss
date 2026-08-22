@@ -6,8 +6,32 @@
   <link>https://plugin-library.tiddlyhost.com/</link>
   <description>a non-linear personal web notebook</description>
   <language>en-GB</language>
-  <lastBuildDate>Sat, 22 Aug 2026 12:55:42 GMT</lastBuildDate>
+  <lastBuildDate>Sat, 22 Aug 2026 12:56:53 GMT</lastBuildDate>
   <item>
+      <title>New article added to the feed</title>
+      <category>feed</category>
+      <description></description>
+      <content:encoded><![CDATA[]]></content:encoded>
+	  <pubDate>Sat, 22 Aug 2026 12:56:53 GMT</pubDate>
+      <link>https://plugin-library.tiddlyhost.com/#New%20article%20added%20to%20the%20feed</link>
+      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260822125632270%5D%5D</guid>
+</item><item>
+      <title>New Tiddler 1 1</title>
+      <category>feed</category>
+      <description></description>
+      <content:encoded><![CDATA[]]></content:encoded>
+	  <pubDate>Sat, 22 Aug 2026 12:56:13 GMT</pubDate>
+      <link>https://plugin-library.tiddlyhost.com/#New%20Tiddler%201%201</link>
+      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260822125611926%5D%5D</guid>
+</item><item>
+      <title>New Tiddler 1</title>
+      <category>feed</category>
+      <description></description>
+      <content:encoded><![CDATA[]]></content:encoded>
+	  <pubDate>Sat, 22 Aug 2026 12:55:51 GMT</pubDate>
+      <link>https://plugin-library.tiddlyhost.com/#New%20Tiddler%201</link>
+      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260822125548911%5D%5D</guid>
+</item><item>
       <title>New Tiddler</title>
       <category>feed</category>
       <description></description>
