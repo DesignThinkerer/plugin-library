@@ -6,8 +6,16 @@
   <link>https://plugin-library.tiddlyhost.com/</link>
   <description>a non-linear personal web notebook</description>
   <language>en-GB</language>
-  <lastBuildDate>Sat, 22 Aug 2026 13:05:45 GMT</lastBuildDate>
+  <lastBuildDate>Sat, 22 Aug 2026 13:08:55 GMT</lastBuildDate>
   <item>
+      <title>RSS Feed Plugin: Added auto upload feature</title>
+      <category>feed</category>
+      <description></description>
+      <content:encoded><![CDATA[<p>The plugin now has a Background Actions that check when a tiddler is added or removed from the feed and automatically send the update to github. Note that modifications done to a tiddler are not detected, so if you want to update the feed after editing a tiddler, remember to manually send the feed to github using the button, or let the plugin update the feed when a new tiddler is added or removed from the feed. This feature can be disabled in the plugin settings.</p>]]></content:encoded>
+	  <pubDate>Sat, 22 Aug 2026 13:08:55 GMT</pubDate>
+      <link>https://plugin-library.tiddlyhost.com/#RSS%20Feed%20Plugin%3A%20Added%20auto%20upload%20feature</link>
+      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260822130618133%5D%5D</guid>
+</item><item>
       <title>Announcing the RSS Feed Plugin</title>
       <category>feed</category>
       <description></description>
