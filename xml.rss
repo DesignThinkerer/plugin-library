@@ -6,48 +6,8 @@
   <link>https://plugin-library.tiddlyhost.com/</link>
   <description>a non-linear personal web notebook</description>
   <language>en-GB</language>
-  <lastBuildDate>Sat, 22 Aug 2026 13:47:02 GMT</lastBuildDate>
+  <lastBuildDate>Sat, 22 Aug 2026 13:48:31 GMT</lastBuildDate>
   <item>
-      <title>New Tiddler 1 1 1 1</title>
-      <category>feed</category>
-      <description></description>
-      <content:encoded><![CDATA[]]></content:encoded>
-	  <pubDate>Sat, 22 Aug 2026 13:47:02 GMT</pubDate>
-      <link>https://plugin-library.tiddlyhost.com/#New%20Tiddler%201%201%201%201</link>
-      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260822134701255%5D%5D</guid>
-</item><item>
-      <title>New Tiddler 1 1 1</title>
-      <category>feed</category>
-      <description></description>
-      <content:encoded><![CDATA[]]></content:encoded>
-	  <pubDate>Sat, 22 Aug 2026 13:46:37 GMT</pubDate>
-      <link>https://plugin-library.tiddlyhost.com/#New%20Tiddler%201%201%201</link>
-      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260822134635762%5D%5D</guid>
-</item><item>
-      <title>New Tiddler 1 1</title>
-      <category>feed</category>
-      <description></description>
-      <content:encoded><![CDATA[]]></content:encoded>
-	  <pubDate>Sat, 22 Aug 2026 13:46:23 GMT</pubDate>
-      <link>https://plugin-library.tiddlyhost.com/#New%20Tiddler%201%201</link>
-      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260822134622809%5D%5D</guid>
-</item><item>
-      <title>New Tiddler 1</title>
-      <category>feed</category>
-      <description></description>
-      <content:encoded><![CDATA[]]></content:encoded>
-	  <pubDate>Sat, 22 Aug 2026 13:45:58 GMT</pubDate>
-      <link>https://plugin-library.tiddlyhost.com/#New%20Tiddler%201</link>
-      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260822134557387%5D%5D</guid>
-</item><item>
-      <title>New Tiddler</title>
-      <category>feed</category>
-      <description></description>
-      <content:encoded><![CDATA[]]></content:encoded>
-	  <pubDate>Sat, 22 Aug 2026 13:45:50 GMT</pubDate>
-      <link>https://plugin-library.tiddlyhost.com/#New%20Tiddler</link>
-      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260822134547801%5D%5D</guid>
-</item><item>
       <title>RSS Feed Plugin 0.0.4: Added auto upload feature</title>
       <category>feed</category>
       <description></description>
