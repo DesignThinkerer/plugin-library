@@ -14,14 +14,14 @@ type: application/javascript
 module-type: library 
 
 A simple HTTP-over-window.postMessage implementation of a standard TiddlyWeb-compatible server. 
-It uses real HTTP to load the individual tiddler JSON files. 
+Adapted for GitHub Pages static hosting by extracting tiddlers directly from the local store.
 \*/
 (function () {
   /*jslint node: true, browser: true */
   /*global $tw: false */
   "use strict";
 
-  var assetList = [
+  var assetList = 
 
 {"version":"0.0.5","description":"RSS Feed for your wiki","plugin-type":"plugin","stability":"STABILITY_1_EXPERIMENTAL","title":"$:/plugins/theophile.dev/rss-feed","readme":"This plugin is a pure wikitext solution to upload a TiddlyWiki-generated RSS feed to GitHub. This is a refactor of a [[previous experiment|https://rss.tiddlyhost.com/]] using the file upload widget.\n\n\n!!! About the RSS format\n\n[[RSS|https://en.wikipedia.org/wiki/RSS]] stands for ''r''eally ''s''imple ''s''yndication. They are XML files, most of the time automatically generated, that contain the latest news from a website. A feed reader is able to read these files and notify a user when new content is available.\n\nRecommended feed reader: https://nodetics.com/feedbro\n\nIt's also possible to [[convert an RSS feed to a newsletter|https://www.google.com/search?q=rss+feed+to+email]].\n\n!!! Comparison with the previous approach\n\n<table>\n<thead>\n<tr><th></th><th>Pure Wikitext RSS Plugin</th><th>GitHub File Uploads Plugin Approach</th></tr>\n</thead>\n<tbody>\n<tr>\n<td>Implementation</td>\n<td>Built natively using TiddlyWiki wikitext macros and core action widgets, completely avoiding custom JavaScript.</td>\n<td>Uses a custom JavaScript module (`module-type: uploader`) and embeds a third-party REST client library, `Octokat.js`.</td>\n</tr>\n<tr>\n<td>API</td>\n<td>Leverages the high-level GitHub Repository Contents API to manage a single file.</td>\n<td>Uses the lower-level Git Data API to manipulate references, blobs, trees, and commits directly.</td>\n</tr>\n<tr>\n<td> Data Processing </td>\n<td> \n\nTwo-step HTTP process:\n\n# GET Request (Fetch SHA): It first queries the target repository's file path via a `GET` request to retrieve the file's current SHA hash.\n# PUT Request (Update/Create): Upon completion, a callback macro (`handle-sha`) inspects the status code. If the file exists (status code 200), it passes the retrieved SHA into the JSON payload of a subsequent `PUT` request to safely update the file. If the file does not exist, it proceeds with a standard `PUT` request without the SHA string to create it.\n\n</td>\n<td>Designed to queue multiple binary files in an array and bundle them into a single, cohesive commit during its `deinitialize` phase. </td>\n</tr>\n<tr>\n<td>Credential Management</td>\n<td>Isolates its configuration entirely, requiring the user to re-input their repository details and create a specific password store entry (`gh`) in its own settings panel.</td>\n<td>Natively integrates with TiddlyWiki's core GitHub Saver, extracting necessary data from `$:/GitHub/Repo` and `$tw.utils.getPassword(\"github\")`.</td>\n</tr>\n</tbody>\n</table>\n\n!!! Limitations\n\nThe pure wikitext approach avoids bloating the wiki with the heavy `Octokat.js` JavaScript library, at the cost of vulnerability to race conditions (`409 Conflict` if the SHA changes between the GET and PUT requests), whereas building a Git commit tree (like the uploader plugin does) ensures atomic updates. As pure wikitext does not support Promises, it handles asynchronous operations sequentially using the `oncompletion` attribute of the `$action-sendmessage` widget, routing the response data into nested callback macros (like `<<handle-sha>>`) to complete the HTTP request chain.","icon":"data:image/svg+xml;utf8,<svg width=\"22pt\" height=\"22pt\" xmlns=\"http://www.w3.org/2000/svg\"><svg class=\"tc-image-feed-button tc-image-button\" height=\"22pt\" viewBox=\"0 0 8 8\" width=\"22pt\"><path d=\"M1 2A5 5 0 016 7H7A6 6 0 001 1ZM1 4A3 3 0 014 7H5A4 4 0 001 3ZM3 6A1 1 0 012 7A1 1 0 011 6A1 1 0 012 5A1 1 0 013 6Z\"></path></svg></svg>"}
 
@@ -31,130 +31,76 @@ It uses real HTTP to load the individual tiddler JSON files.
 
 
 
-];
+;
 
   // Listen for window messages
-  window.addEventListener(
-    "message",
-    function listener(event) {
-      console.log("plugin library: Received message from", event.origin);
-      console.log("plugin library: Message content", event.data);
-      switch (event.data.verb) {
-        case "GET":
-          if (event.data.url === "recipes/library/tiddlers.json") {
-            // Route for recipes/library/tiddlers.json
-            event.source.postMessage(
-              {
-                verb: "GET-RESPONSE",
-                status: "200",
-                cookies: event.data.cookies,
-                url: event.data.url,
-                type: "application/json",
-                body: JSON.stringify(assetList, null, 4),
-              },
-              "*"
-            );
-          } else if (event.data.url.indexOf("recipes/library/tiddlers/") === 0) {
-            var pluginTitle = removePrefix(
-              event.data.url,
-              "recipes/library/tiddlers/"
-            );
+  window.addEventListener("message", function listener(event) {
+    console.log("plugin library: Received message from", event.origin);
+    
+    if (event.data.verb === "GET") {
+      if (event.data.url === "recipes/library/tiddlers.json") {
+        // Route for the main asset list
+        event.source.postMessage({
+          verb: "GET-RESPONSE",
+          status: "200",
+          cookies: event.data.cookies,
+          url: event.data.url,
+          type: "application/json",
+          body: assetList
+        }, "*");
+        
+      } else if (event.data.url.indexOf("recipes/library/tiddlers/") === 0) {
+        // Route for a specific plugin request
+        var pluginTitle = removePrefix(event.data.url, "recipes/library/tiddlers/");
 
-            // Strip the .json suffix if present
-            if (pluginTitle.endsWith(".json")) {
-              pluginTitle = pluginTitle.slice(0, -5); // Remove the last 5 characters (".json")
-            }
+        // Strip the .json suffix if present and decode the URL
+        if (pluginTitle.endsWith(".json")) {
+          pluginTitle = pluginTitle.slice(0, -5);
+        }
+        pluginTitle = decodeURIComponent(pluginTitle);
 
-            var url =
-              "/tiddlers.json?title=" +
-              pluginTitle +
-              "&pretty=1&include_system=1";
+        // Fetch the plugin directly from the local TiddlyWiki store
+        var tiddler = $tw.wiki.getTiddler(pluginTitle);
 
-            // Route for recipes/library/tiddlers/<uri-encoded-tiddler-title>.json
-            httpGet(url, function (err, responseText) {
-              if (err) {
-                event.source.postMessage(
-                  {
-                    verb: "GET-RESPONSE",
-                    status: "404",
-                    cookies: event.data.cookies,
-                    url: event.data.url,
-                    type: "text/plain",
-                    body: "Not found",
-                  },
-                  "*"
-                );
-              } else {
-                var cleanedResponse = stripOuterBrackets(responseText);
-                event.source.postMessage(
-                  {
-                    verb: "GET-RESPONSE",
-                    status: "200",
-                    cookies: event.data.cookies,
-                    url: event.data.url,
-                    type: "application/json",
-                    body: cleanedResponse,
-                  },
-                  "*"
-                );
-              }
-            });
-          } else {
-            event.source.postMessage(
-              {
-                verb: "GET-RESPONSE",
-                status: "404",
-                cookies: event.data.cookies,
-                url: event.data.url,
-                type: "text/plain",
-                body: "Not found",
-              },
-              "*"
-            );
-          }
-          break;
+        if (tiddler) {
+          // Send back the tiddler fields as a JSON object
+          event.source.postMessage({
+            verb: "GET-RESPONSE",
+            status: "200",
+            cookies: event.data.cookies,
+            url: event.data.url,
+            type: "application/json",
+            body: JSON.stringify(tiddler.fields, null, 4)
+          }, "*");
+        } else {
+          // Plugin not found in the wiki
+          send404(event);
+        }
+      } else {
+        // Unknown route
+        send404(event);
       }
-    },
-    false
-  );
+    }
+  }, false);
+
+  // Helper to send a 404 Not Found message
+  function send404(event) {
+    event.source.postMessage({
+      verb: "GET-RESPONSE",
+      status: "404",
+      cookies: event.data.cookies,
+      url: event.data.url,
+      type: "text/plain",
+      body: "Not found"
+    }, "*");
+  }
 
   // Helper to remove string prefixes
   function removePrefix(string, prefix) {
     if (string.indexOf(prefix) === 0) {
       return string.substr(prefix.length);
-    } else {
-      return string;
     }
-  }
-
-  // Helper to strip outer brackets [] from JSON response
-  function stripOuterBrackets(jsonString) {
-    try {
-      var parsed = JSON.parse(jsonString);
-      if (Array.isArray(parsed) && parsed.length === 1) {
-        return JSON.stringify(parsed[0], null, 4); // Return the first (and only) object in the array
-      }
-      return jsonString; // Return as-is if not an array or has multiple items
-    } catch (error) {
-      console.error("Error parsing JSON:", error);
-      return jsonString; // Return original string if parsing fails
-    }
-  }
-
-  // Helper for HTTP GET
-  function httpGet(url, callback) {
-    var http = new XMLHttpRequest();
-    http.open("GET", url, true);
-    http.onreadystatechange = function () {
-      if (http.readyState == 4) {
-        if (http.status == 200) {
-          callback(null, http.responseText);
-        } else {
-          callback(new Error("HTTP error: " + http.status), null);
-        }
-      }
-    };
-    http.send();
+    return string;
   }
 })();
 </script>
@@ -452,7 +398,7 @@ Error message and password prompt
 {"text":"\u003C$let qualified-state=\u003C\u003Cqualify \"$:/state/plugin-info\">> >\n\u003C$list filter={{$:/plugins/theophile.dev/githubpluginlibrary/assetList!!filter}} emptyMessage=\u003C\u003Clingo \"Empty/Hint\">>  template=\"$:/core/ui/Components/plugin-info\"/>\n\u003C/$let>","tags":"$:/plugins/theophile.dev/githubpluginlibrary","title":"$:/plugins/theophile.dev/githubpluginlibrary/PluginsIncluded"},
 {"created":"20260823220826187","creator":"theophile.dev","text":"{{$:/plugins/theophile.dev/githubpluginlibrary/faq/installing}}\n\n{{||$:/plugins/theophile.dev/Commons/templates/readme}}","tags":"$:/tags/PluginLibrary $:/plugins/theophile.dev/githubpluginlibrary","url":"https://plugins.theophile.dev/","caption":"Github Plugin Library","filter":"[plugin-type[plugin]] -$:/core","title":"$:/plugins/theophile.dev/githubpluginlibrary/readme","modified":"20260823220835269","modifier":"theophile.dev"},
 {"text":"\\procedure action-reset-library()\n\u003C$action-deletetiddler $filter=\"\n[has[plugin-type]!author[JeremyRuston]]\n-$:/plugins/theophile.dev/githubpluginlibrary\n-$:/plugins/theophile.dev/plugin-maker\n\"/>\n\u003C$action-setfield $tiddler=\"$:/plugins/theophile.dev/githubpluginlibrary/assetList\" $field=\"filter\" $value=\"[ℹ️[Base filter to list plugins created by the author of this wiki]]\n[has[plugin-type]author{$:/status/UserName}]\"/>\n\\end\n\n\u003C$button actions=\u003C\u003Caction-reset-library>>>reset the library\u003C/$button>","tags":"","title":"$:/plugins/theophile.dev/githubpluginlibrary/reset"},
-{"text":"`\u003Cscript>\n/*\\ \ntitle: $:/plugins/tiddlywiki/pluginlibrary/libraryserver.js \ntype: application/javascript \nmodule-type: library \n\nA simple HTTP-over-window.postMessage implementation of a standard TiddlyWeb-compatible server. \nIt uses real HTTP to load the individual tiddler JSON files. \n\\*/\n(function () {\n  /*jslint node: true, browser: true */\n  /*global $tw: false */\n  \"use strict\";\n\n  var assetList = [`{{$:/plugins/theophile.dev/githubpluginlibrary/assetList}}`];\n\n  // Listen for window messages\n  window.addEventListener(\n    \"message\",\n    function listener(event) {\n      console.log(\"plugin library: Received message from\", event.origin);\n      console.log(\"plugin library: Message content\", event.data);\n      switch (event.data.verb) {\n        case \"GET\":\n          if (event.data.url === \"recipes/library/tiddlers.json\") {\n            // Route for recipes/library/tiddlers.json\n            event.source.postMessage(\n              {\n                verb: \"GET-RESPONSE\",\n                status: \"200\",\n                cookies: event.data.cookies,\n                url: event.data.url,\n                type: \"application/json\",\n                body: JSON.stringify(assetList, null, 4),\n              },\n              \"*\"\n            );\n          } else if (event.data.url.indexOf(\"recipes/library/tiddlers/\") === 0) {\n            var pluginTitle = removePrefix(\n              event.data.url,\n              \"recipes/library/tiddlers/\"\n            );\n\n            // Strip the `.json` suffix if present\n            if (pluginTitle.endsWith(\".json\")) {\n              pluginTitle = pluginTitle.slice(0, -5); // Remove the last 5 characters (\".json\")\n            }\n\n            var url =\n              \"`{{$:/SiteUrl}}`/tiddlers.json?title=\" +\n              pluginTitle +\n              \"&pretty=1&include_system=1\";\n\n            // Route for recipes/library/tiddlers/\u003Curi-encoded-tiddler-title>.json\n            httpGet(url, function (err, responseText) {\n              if (err) {\n                event.source.postMessage(\n                  {\n                    verb: \"GET-RESPONSE\",\n                    status: \"404\",\n                    cookies: event.data.cookies,\n                    url: event.data.url,\n                    type: \"text/plain\",\n                    body: \"Not found\",\n                  },\n                  \"*\"\n                );\n              } else {\n                var cleanedResponse = stripOuterBrackets(responseText);\n                event.source.postMessage(\n                  {\n                    verb: \"GET-RESPONSE\",\n                    status: \"200\",\n                    cookies: event.data.cookies,\n                    url: event.data.url,\n                    type: \"application/json\",\n                    body: cleanedResponse,\n                  },\n                  \"*\"\n                );\n              }\n            });\n          } else {\n            event.source.postMessage(\n              {\n                verb: \"GET-RESPONSE\",\n                status: \"404\",\n                cookies: event.data.cookies,\n                url: event.data.url,\n                type: \"text/plain\",\n                body: \"Not found\",\n              },\n              \"*\"\n            );\n          }\n          break;\n      }\n    },\n    false\n  );\n\n  // Helper to remove string prefixes\n  function removePrefix(string, prefix) {\n    if (string.indexOf(prefix) === 0) {\n      return string.substr(prefix.length);\n    } else {\n      return string;\n    }\n  }\n\n  // Helper to strip outer brackets `[]` from JSON response\n  function stripOuterBrackets(jsonString) {\n    try {\n      var parsed = JSON.parse(jsonString);\n      if (Array.isArray(parsed) && parsed.length === 1) {\n        return JSON.stringify(parsed[0], null, 4); // Return the first (and only) object in the array\n      }\n      return jsonString; // Return as-is if not an array or has multiple items\n    } catch (error) {\n      console.error(\"Error parsing JSON:\", error);\n      return jsonString; // Return original string if parsing fails\n    }\n  }\n\n  // Helper for HTTP GET\n  function httpGet(url, callback) {\n    var http = new XMLHttpRequest();\n    http.open(\"GET\", url, true);\n    http.onreadystatechange = function () {\n      if (http.readyState == 4) {\n        if (http.status == 200) {\n          callback(null, http.responseText);\n        } else {\n          callback(new Error(\"HTTP error: \" + http.status), null);\n        }\n      }\n    };\n    http.send();\n  }\n})();\n\u003C/script>`","tags":"$:/tags/RawMarkupWikified/TopHead $:/plugins/theophile.dev/githubpluginlibrary","code-body":"yes","title":"$:/plugins/theophile.dev/githubpluginlibrary/script"},
+{"created":"20260823221222122","creator":"theophile.dev","text":"`\u003Cscript>\n/*\\ \ntitle: $:/plugins/tiddlywiki/pluginlibrary/libraryserver.js \ntype: application/javascript \nmodule-type: library \n\nA simple HTTP-over-window.postMessage implementation of a standard TiddlyWeb-compatible server. \nAdapted for GitHub Pages static hosting by extracting tiddlers directly from the local store.\n\\*/\n(function () {\n  /*jslint node: true, browser: true */\n  /*global $tw: false */\n  \"use strict\";\n\n  var assetList = `{{$:/plugins/theophile.dev/githubpluginlibrary/assetList}}`;\n\n  // Listen for window messages\n  window.addEventListener(\"message\", function listener(event) {\n    console.log(\"plugin library: Received message from\", event.origin);\n    \n    if (event.data.verb === \"GET\") {\n      if (event.data.url === \"recipes/library/tiddlers.json\") {\n        // Route for the main asset list\n        event.source.postMessage({\n          verb: \"GET-RESPONSE\",\n          status: \"200\",\n          cookies: event.data.cookies,\n          url: event.data.url,\n          type: \"application/json\",\n          body: assetList\n        }, \"*\");\n        \n      } else if (event.data.url.indexOf(\"recipes/library/tiddlers/\") === 0) {\n        // Route for a specific plugin request\n        var pluginTitle = removePrefix(event.data.url, \"recipes/library/tiddlers/\");\n\n        // Strip the `.json` suffix if present and decode the URL\n        if (pluginTitle.endsWith(\".json\")) {\n          pluginTitle = pluginTitle.slice(0, -5);\n        }\n        pluginTitle = decodeURIComponent(pluginTitle);\n\n        // Fetch the plugin directly from the local TiddlyWiki store\n        var tiddler = $tw.wiki.getTiddler(pluginTitle);\n\n        if (tiddler) {\n          // Send back the tiddler fields as a JSON object\n          event.source.postMessage({\n            verb: \"GET-RESPONSE\",\n            status: \"200\",\n            cookies: event.data.cookies,\n            url: event.data.url,\n            type: \"application/json\",\n            body: JSON.stringify(tiddler.fields, null, 4)\n          }, \"*\");\n        } else {\n          // Plugin not found in the wiki\n          send404(event);\n        }\n      } else {\n        // Unknown route\n        send404(event);\n      }\n    }\n  }, false);\n\n  // Helper to send a 404 Not Found message\n  function send404(event) {\n    event.source.postMessage({\n      verb: \"GET-RESPONSE\",\n      status: \"404\",\n      cookies: event.data.cookies,\n      url: event.data.url,\n      type: \"text/plain\",\n      body: \"Not found\"\n    }, \"*\");\n  }\n\n  // Helper to remove string prefixes\n  function removePrefix(string, prefix) {\n    if (string.indexOf(prefix) === 0) {\n      return string.substr(prefix.length);\n    }\n    return string;\n  }\n})();\n\u003C/script>`","tags":"$:/tags/RawMarkupWikified/TopHead $:/plugins/theophile.dev/githubpluginlibrary","code-body":"yes","title":"$:/plugins/theophile.dev/githubpluginlibrary/script","modified":"20260823221236435","modifier":"theophile.dev"},
 {"text":"Library name: \u003C$edit tag=\"input\" tiddler=\"$:/plugins/theophile.dev/githubpluginlibrary/readme\" field=\"caption\"/>\n\n\n[[Filter expression|https://tiddlywiki.com/static/Filters.html]] for listing the plugins to be included:\n\u003C$edit tag=\"textarea\" tiddler=\"$:/plugins/theophile.dev/githubpluginlibrary/assetList\" field=\"filter\" class=\"tc-edit-texteditor tc-edit-texteditor-body\"/>\n\n{{$:/plugins/theophile.dev/githubpluginlibrary/PluginsIncluded}}","tags":"$:/plugins/theophile.dev/githubpluginlibrary","title":"$:/plugins/theophile.dev/githubpluginlibrary/settings"},
 {"text":"\u003C!--\nThis tiddler update the url of the library tiddler to keep it in sync with the current url of the wiki.\n-->\n\u003C$action-setfield \n$tiddler=\"$:/plugins/theophile.dev/githubpluginlibrary/readme\" \nurl={{$:/info/url/full}}\n/>","tags":"$:/tags/StartupAction $:/plugins/theophile.dev/githubpluginlibrary","code-body":"yes","title":"$:/plugins/theophile.dev/githubpluginlibrary/updatelibrary"},
 {"text":"{\"tiddlers\":{\"$:/plugins/theophile.dev/rss-feed/auto-upload\":{\"text\":\"\u003C$tiddler tiddler=\\\"$:/plugins/theophile.dev/rss-feed/settings\\\">\\n\u003C%if [{!!auto-upload}match[true]] %>\\n\u003C$importvariables filter=\\\"[\u003CcurrentTiddler>]\\\">\\n\u003C\u003Cupdate-feed>>\\n\",\"tags\":\"$:/tags/BackgroundAction\",\"track-filter\":\"[subfilter{$:/plugins/theophile.dev/rss-feed/settings!!feed-filter}haschanged[]!is[draft]]\",\"code-body\":\"yes\"},\"$:/plugins/theophile.dev/rss-feed/feed-button\":{\"text\":\"\\\\whitespace trim\\n\u003C$importvariables filter=\\\"[[$:/plugins/theophile.dev/rss-feed/settings]]\\\">\\n\u003C$tiddler tiddler=\\\"$:/plugins/theophile.dev/rss-feed/settings\\\">\\n\u003C$button actions=\u003C\u003Cupdate-feed>>  tooltip=\\\"Click to Send feed to GitHub\\\" class=\u003C\u003Ctv-config-toolbar-class>>>\\n\u003C%if [\u003Ctv-config-toolbar-icons>match[yes]] %>\\n{{$:/plugins/theophile.dev/rss-feed/icon}}\\n\u003C%endif%>\\n\u003C%if [\u003Ctv-config-toolbar-text>match[yes]] %>\\n\u003Cspan class=\\\"tc-btn-text\\\">\\n\u003C$text text=\\\"Send feed to GitHub\\\"/>\\n\u003C/span>\\n\u003C%endif%>\\n\u003C/$button>\\n\u003C/$tiddler>\\n\u003C/$importvariables>\",\"tags\":\"$:/tags/PageControls\"},\"$:/plugins/theophile.dev/rss-feed/icon\":{\"text\":\"\\\\parameters (size:\\\"22pt\\\")\\n\u003Csvg width=\u003C\u003Csize>> height=\u003C\u003Csize>> class=\\\"tc-image-feed-button tc-image-button\\\" viewBox=\\\"0 0 8 8\\\" >\u003Cpath d=\\\"M1 2A5 5 0 016 7H7A6 6 0 001 1ZM1 4A3 3 0 014 7H5A4 4 0 001 3ZM3 6A1 1 0 012 7A1 1 0 011 6A1 1 0 012 5A1 1 0 013 6Z\\\"/>\u003C/svg>\",\"tags\":\"$:/tags/Image\"},\"$:/plugins/theophile.dev/rss-feed/readme\":{\"text\":\"This plugin is a pure wikitext solution to upload a TiddlyWiki-generated RSS feed to GitHub. This is a refactor of a [[previous experiment|https://rss.tiddlyhost.com/]] using the file upload widget.\\n\\n\\n!!! About the RSS format\\n\\n[[RSS|https://en.wikipedia.org/wiki/RSS]] stands for ''r''eally ''s''imple ''s''yndication. They are XML files, most of the time automatically generated, that contain the latest news from a website. A feed reader is able to read these files and notify a user when new content is available.\\n\\nRecommended feed reader: https://nodetics.com/feedbro\\n\\nIt's also possible to [[convert an RSS feed to a newsletter|https://www.google.com/search?q=rss+feed+to+email]].\\n\\n!!! Comparison with the previous approach\\n\\n\u003Ctable>\\n\u003Cthead>\\n\u003Ctr>\u003Cth>\u003C/th>\u003Cth>Pure Wikitext RSS Plugin\u003C/th>\u003Cth>GitHub File Uploads Plugin Approach\u003C/th>\u003C/tr>\\n\u003C/thead>\\n\u003Ctbody>\\n\u003Ctr>\\n\u003Ctd>Implementation\u003C/td>\\n\u003Ctd>Built natively using TiddlyWiki wikitext macros and core action widgets, completely avoiding custom JavaScript.\u003C/td>\\n\u003Ctd>Uses a custom JavaScript module (`module-type: uploader`) and embeds a third-party REST client library, `Octokat.js`.\u003C/td>\\n\u003C/tr>\\n\u003Ctr>\\n\u003Ctd>API\u003C/td>\\n\u003Ctd>Leverages the high-level GitHub Repository Contents API to manage a single file.\u003C/td>\\n\u003Ctd>Uses the lower-level Git Data API to manipulate references, blobs, trees, and commits directly.\u003C/td>\\n\u003C/tr>\\n\u003Ctr>\\n\u003Ctd> Data Processing \u003C/td>\\n\u003Ctd> \\n\\nTwo-step HTTP process:\\n\\n# GET Request (Fetch SHA): It first queries the target repository's file path via a `GET` request to retrieve the file's current SHA hash.\\n# PUT Request (Update/Create): Upon completion, a callback macro (`handle-sha`) inspects the status code. If the file exists (status code 200), it passes the retrieved SHA into the JSON payload of a subsequent `PUT` request to safely update the file. If the file does not exist, it proceeds with a standard `PUT` request without the SHA string to create it.\\n\\n\u003C/td>\\n\u003Ctd>Designed to queue multiple binary files in an array and bundle them into a single, cohesive commit during its `deinitialize` phase. \u003C/td>\\n\u003C/tr>\\n\u003Ctr>\\n\u003Ctd>Credential Management\u003C/td>\\n\u003Ctd>Isolates its configuration entirely, requiring the user to re-input their repository details and create a specific password store entry (`gh`) in its own settings panel.\u003C/td>\\n\u003Ctd>Natively integrates with TiddlyWiki's core GitHub Saver, extracting necessary data from `$:/GitHub/Repo` and `$tw.utils.getPassword(\\\"github\\\")`.\u003C/td>\\n\u003C/tr>\\n\u003C/tbody>\\n\u003C/table>\\n\\n!!! Limitations\\n\\nThe pure wikitext approach avoids bloating the wiki with the heavy `Octokat.js` JavaScript library, at the cost of vulnerability to race conditions (`409 Conflict` if the SHA changes between the GET and PUT requests), whereas building a Git commit tree (like the uploader plugin does) ensures atomic updates. As pure wikitext does not support Promises, it handles asynchronous operations sequentially using the `oncompletion` attribute of the `$action-sendmessage` widget, routing the response data into nested callback macros (like `\u003C\u003Chandle-sha>>`) to complete the HTTP request chain.\"},\"$:/plugins/theophile.dev/rss-feed/settings\":{\"text\":\"\u003C!-- RSS guidelines: https://www.rssboard.org/rss-profile -->\\n\\\\define dateTemplate() [UTC]ddd, 0DD mmm YYYY 0hh:0mm:0ss GMT\\n\\n\\\\procedure item()\\n\u003C$text text=`\u003Citem>\\n      \u003Ctitle>$(currentTiddler)$\u003C/title>\\n      \u003Ccategory>${[all[current]tags[]sortan[]join[/]]}$\u003C/category>\\n      \u003Cdescription>${[{!!description}]}$\u003C/description>\\n      \u003Ccontent:encoded>\u003C![CDATA[`/>\u003C$wikify name=\\\"content\\\" output=\\\"html\\\" mode=\\\"inline\\\" text=\\\"\\\"\\\"\u003C$transclude mode=\\\"block\\\"/>\\\"\\\"\\\">\u003C$text text=\u003C\u003Ccontent>> />\u003C/$wikify>\u003C$text text=`]]>\u003C/content:encoded>\\n\\t  \u003CpubDate>${ [{!!modified}else{!!created}format:date\u003CdateTemplate>]}$\u003C/pubDate>\\n      \u003Clink>${[{$:/info/url/full}]}$#${[{!!title}encodeuricomponent[]]}$\u003C/link>\\n      \u003Cguid isPermaLink='true'>${[{$:/info/url/full}]}$#:%5Bcreated%5B${[{!!created}]}$%5D%5D\u003C/guid>\\n\u003C/item>`/>\\n\\\\end\\n\\n\\\\procedure rss()\\n\u003C?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" ?>\\n\u003Crss version=\\\"2.0\\\" xmlns:atom=\\\"http://www.w3.org/2005/Atom\\\" xmlns:content=\\\"http://purl.org/rss/1.0/modules/content/\\\">\\n\u003Cchannel>\\n  \u003Catom:link href=\\\"$(base)$$(path)$\\\" rel=\\\"self\\\" type=\\\"application/rss+xml\\\" />\\n  \u003Ctitle>\u003C![CDATA[$(title)$]]>\u003C/title>\\n  \u003Clink>${[{$:/info/url/full}]}$\u003C/link>\\n  \u003Cdescription>a non-linear personal web notebook\u003C/description>\\n  \u003Clanguage>$(language)$\u003C/language>\\n  \u003ClastBuildDate>${[\u003Cnow [UTC]YYYY0MM0DD0hh0mm0ss0XXX>format:date\u003CdateTemplate>]}$\u003C/lastBuildDate>\\n  $(feedItems)$\\n\u003C/channel>\\n\u003C/rss>\\n\\\\end\\n\\n\\\\function feed()\\n[{!!username}]=>username\\n[{!!repo}]=>repo\\n[{!!file-path}]=>path\\n\\n\\\"https://$(username)$.github.io/$(repo)$/\\\"+[substitute[]]=>base\\n[{$:/SiteTitle}]=>title\\n[{$:/language}trim[$:/languages/]]=>language\\n\\n[\u003Crss>substitute[]] \\n\\\\end\\n\\n\\\\function repo-url()\\n[{!!username}]=>username\\n[{!!repo}]=>repo\\n\\\"https://github.com/$(username)$/$(repo)$\\\"+[substitute[]]\\n\\\\end\\n\\n\\\\function feed-link()\\n[{!!username}]=>username\\n[{!!repo}]=>repo\\n[{!!file-path}]=>path\\n\\\"https://$(username)$.github.io/$(repo)$/$(path)$\\\"+[substitute[]]\\n\\\\end\\n\\n\u003C!-- send to github logic -->\\n\\\\procedure update-feed()\\n\\\\procedure notify()\\n\u003C$parameters message>\\n\u003C$action-sendmessage $message=\\\"tm-notify\\\" $param=\\\"$:/plugins/theophile.dev/rss-feed/templates/toast\\\" message=\u003C\u003Cmessage>> />\\n\u003C/$parameters>\\n\\\\end notify\\n\\\\procedure handle-sha()\\n\\\\procedure finally()\\n    \u003C!-- https://docs.github.com/en/rest/repos/contents?apiVersion=2026-03-10#create-or-update-file-contents -->\\n    \u003C%if [\u003Cstatus>match[200]] [\u003Cstatus>match[201]] %>\\n    \u003C\u003Cnotify message=`Saved \u003Ca href=\\\"${[\u003Cdata>jsonget[content],[html_url]]}$\\\">feed\u003C/a>`>>\\n    \u003C%elseif [\u003Cstatus>match[404]] %>\\n    \u003C\u003Cnotify message=\\\"Error: Resource not found.\\\" >>\\n    \u003C%elseif [\u003Cstatus>match[409]] %>\\n    \u003C\u003Cnotify message=\\\"Error: Conflict. Try again after a bit\\\" >>\\n    \u003C%elseif [\u003Cstatus>match[422]] %>\\n    \u003C\u003Cnotify message=\\\"Error: Validation failed, or the endpoint has been spammed.\\\" >>\\n    \u003C%else%>\\n    \u003C\u003Cnotify message=`Error: $(status)$`  >>\\n    \u003C%endif%>\\n\\\\end finally\\n\u003C%if [\u003Cstatus>match[200]] %>\\n\u003C$action-sendmessage\\n    $message=\\\"tm-http-request\\\"\\n    url=\u003C\u003Curl>>\\n    method=\\\"PUT\\\"\\n    basic-auth-username=\u003C\u003Cusername>>\\n    basic-auth-password-from-store=\\\"gh\\\"\\n    header-Content-Type=\\\"application/json\\\"\\n    body=`{\\\"message\\\": \\\"$(commitMessage)$\\\", \\\"content\\\": \\\"$(content)$\\\", \\\"sha\\\": \\\"${ [\u003Cdata>jsonget[sha]] }$\\\", \\\"branch\\\":\\\"$(branch)$\\\"}`\\n    var-notify=\u003C\u003Cnotify>>\\n    oncompletion=\u003C\u003Cfinally>>\\n/>\\n\u003C%else%>\\n\u003C$action-sendmessage\\n    $message=\\\"tm-http-request\\\"\\n    url=\u003C\u003Curl>>\\n    method=\\\"PUT\\\"\\n    basic-auth-username=\u003C\u003Cusername>>\\n    basic-auth-password-from-store=\\\"gh\\\"\\n    header-Content-Type=\\\"application/json\\\"\\n    body=`{\\\"message\\\": \\\"$(commitMessage)$\\\", \\\"content\\\": \\\"$(content)$\\\", \\\"branch\\\":\\\"$(branch)$\\\"}`\\n    var-notify=\u003C\u003Cnotify>>\\n    oncompletion=\u003C\u003Cfinally>>\\n/>\\n\u003C%endif%>\\n\\\\end handle-sha\\n\\n\u003C!-- Step 0: make sure the feed is discoverable -->\\n\u003C$action-setfield $tiddler=\\\"$:/discoverfeed\\\" text=`\u003Clink rel='alternate' type='application/rss+xml' title='RSS' href='$(feed-link)$'/>` tags=\\\"$:/tags/RawMarkup\\\"/>\\n\\n\u003C!-- Step 1: fetch the SHA of the RSS file -->\\n\u003C\u003Cnotify \\\"Starting to upload feed\\\">>\\n\u003C$wikify name=\\\"feedItems\\\" output=\\\"text\\\" text=\\\"\\\"\\\"\u003C$let tv-wikilink-template=`${[{$:/info/url/full}]}$#$uri_encoded$`>\u003C$list filter={{!!feed-filter}}>\u003C$wikify name=\\\"feedItem\\\" output=\\\"text\\\" text=\u003C\u003Citem>> >\u003C$text text=\u003C\u003CfeedItem>> />\u003C/$wikify>\u003C/$list>\u003C/$let>\\\"\\\"\\\">\\n\u003C$let \\n    username={{!!username}}\\n    repo={{!!repo}}\\n    filePath={{!!file-path}}\\n    branch={{!!branch}}\\n    url=`https://api.github.com/repos/$(username)$/$(repo)$/contents/$(filePath)$?ref=$(branch)$`\\n    content={{{ [\u003Cfeed>encodebase64[]]  }}}\\n    commitMessage=`Updated $(now)$`\\n>\\n\u003C$action-sendmessage\\n    $message=\\\"tm-http-request\\\"\\n    url=\u003C\u003Curl>>\\n    method=\\\"GET\\\"\\n    oncompletion=\u003C\u003Chandle-sha>>\\n    var-notify=\u003C\u003Cnotify>>\\n    var-username=\u003C\u003Cusername>>\\n    var-repo=\u003C\u003Crepo>>\\n    var-filePath=\u003C\u003CfilePath>>\\n    var-url=\u003C\u003Curl>>\\n    var-content=\u003C\u003Ccontent>>\\n    var-commitMessage=\u003C\u003CcommitMessage>>\\n    var-branch=\u003C\u003Cbranch>>\\n/>\\n\u003C/$let>\\n\u003C/$wikify>\\n\\\\end update-feed\\n\\n\u003C$tiddler tiddler=\\\"$:/plugins/theophile.dev/rss-feed/settings\\\">\\n\\n[[Create a github account|https://github.com/signup]] and a [[repo|https://github.com/new]] if you dont have one, then enable [[github page|https://docs.github.com/en/pages/quickstart]] in the \u003Ca href=`https://github.com/${[{!!username}]}$/${[{!!repo}]}$/settings/pages`>settings\u003C/a> of your repo. \\n\\n\\n\u003Ctable class=\\\"tc-max-width tc-edit-max-width two-equal-column\\\">\\n\u003Ctr>\\n\u003Ctd>Access Token (\u003Ca title=`* Scroll to Repository access.\\n* Click \\\"Only select repositories\\\".\\n* Select the ${[{!!repo}]}$ repository.` href=`https://github.com/settings/personal-access-tokens/new?name=${[{!!repo}]}$-${[\u003Cnow TIMESTAMP>]}$&description=TiddlyWiki&target_name=${[{!!username}]}$&contents=write`>Create a Personal Access Token here\u003C/a>)\u003C/td>\u003Ctd>\u003C$password  name=\\\"gh\\\"/>\u003C/td>\\n\u003C/tr>\\n\u003Ctr>\\n\u003Ctd>Github Username\u003C/td>\u003Ctd>\u003C$edit field=\\\"username\\\" tag=\\\"input\\\" class=\\\"tc-edit-texteditor\\\"/>\u003C/td>\\n\u003C/tr>\\n\u003Ctr>\\n\u003Ctd>\u003Ca href=\u003C\u003Crepo-url>> >Target repository\u003C/a> (e.g. `Jermolene/TiddlyWiki5`)\u003C/td>\u003Ctd>\u003C$edit field=\\\"repo\\\" tag=\\\"input\\\" class=\\\"tc-edit-texteditor\\\"/>\u003C/td>\\n\u003C/tr>\\n\u003Ctr>\\n\u003Ctd>Target branch for saving (e.g. `main`)\u003C/td>\u003Ctd>\u003C$edit field=\\\"branch\\\" tag=\\\"input\\\" class=\\\"tc-edit-texteditor\\\"/>\u003C/td>\\n\u003C/tr>\\n\u003Ctr>\\n\u003Ctd>Path to \u003Ca href=`https://github.com/${[{!!username}]}$/${[{!!repo}]}$/blob/${[{!!branch}]}$/${[{!!file-path}]}$`>target file\u003C/a> (e.g. `/wiki/`)\u003C/td>\u003Ctd>\u003C$edit field=\\\"file-path\\\" tag=\\\"input\\\" class=\\\"tc-edit-texteditor\\\"/>\u003C/td>\\n\u003C/tr>\\n\u003Ctr>\\n\u003Ctd>Feed filter\u003C/td>\u003Ctd>\u003C$edit field=\\\"feed-filter\\\" tag=\\\"input\\\" class=\\\"tc-edit-texteditor\\\"/>\u003C/td>\\n\u003C/tr>\\n\u003C/table>\\n\\n\u003C$count filter={{!!feed-filter}}/> tiddlers included in the feed:\\n\\n\u003C\u003Clist-links \\\"[subfilter{!!feed-filter}]\\\" >>\\n\\nPreview:\\n\\n\u003C$wikify name=\\\"feedItems\\\" output=\\\"text\\\" text=\\\"\\\"\\\"\u003C$let tv-wikilink-template=`${[{$:/info/url/full}]}$#$uri_encoded$`>\u003C$list filter={{!!feed-filter}}>\u003C$wikify name=\\\"feedItem\\\" output=\\\"text\\\" text=\u003C\u003Citem>> >\u003C$text text=\u003C\u003CfeedItem>> />\u003C/$wikify>\u003C/$list>\u003C/$let>\\\"\\\"\\\">\\n\u003Cdiv style=\\\"height:10lh;overflow:scroll\\\">\\n\u003C$codeblock code=\u003C\u003Cfeed>> />\\n\u003C/div>\\n\u003C/$wikify>\\n\\n\u003C$let tv-config-toolbar-icons=\\\"yes\\\"\\n\\ttv-config-toolbar-text=\\\"yes\\\"\\n\\ttv-config-toolbar-class=\\\"\\\"\\n>\\n{{$:/plugins/theophile.dev/rss-feed/feed-button}} \u003C$checkbox field=\\\"auto-upload\\\" checked=\\\"true\\\"> auto upload\u003C/$checkbox>\\n\u003C/$let>\\n\\nValidate feed : [[by input|https://validator.w3.org/feed/#validate_by_input]] or check the \u003Ca href=`https://validator.w3.org/feed/check.cgi?url=${[\u003Cfeed-link>lowercase[]encodeuricomponent[]]}$`>uploaded feed\u003C/a>.\\n\\n\u003C/$tiddler>\",\"tags\":\"$:/tags/ControlPanel/Settings\",\"file-path\":\"xml.rss\",\"username\":\"DesignThinkerer\",\"repo\":\"plugin-library\",\"tiddler-content\":\"content tiddler\",\"feed-filter\":\"[tag[feed]!sort[modified]limit[10]]\",\"branch\":\"main\",\"caption\":\"Rss Feed\",\"auto-upload\":\"true\"},\"$:/plugins/theophile.dev/rss-feed/templates/toast\":{\"text\":\"\u003C\u003Cmessage>>\",\"code-body\":\"yes\"}}}","core-version":"5.5.0-prerelease","type":"application/json","author":"theophile.dev","list":"readme settings","version":"0.0.5","description":"RSS Feed for your wiki","plugin-type":"plugin","stability":"STABILITY_1_EXPERIMENTAL","title":"$:/plugins/theophile.dev/rss-feed"},
