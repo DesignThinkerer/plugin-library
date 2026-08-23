@@ -6,7 +6,23 @@
   <link>https://plugins.theophile.dev/</link>
   <description>a non-linear personal web notebook</description>
   <language>en-GB</language>
-  <lastBuildDate>Sun, 23 Aug 2026 21:38:32 GMT</lastBuildDate>
-  
+  <lastBuildDate>Sun, 23 Aug 2026 21:39:35 GMT</lastBuildDate>
+  <item>
+      <title>RSS Feed Plugin 0.0.4: Added auto upload feature</title>
+      <category>feed</category>
+      <description></description>
+      <content:encoded><![CDATA[<p><a class="tc-tiddlylink tc-tiddlylink-resolves" href="https://plugins.theophile.dev/#%24%3A%2Fplugins%2Ftheophile.dev%2Frss-feed">The RSS Feed plugin</a> now has a <a class="tc-tiddlylink-external" href="https://tiddlywiki.com/#Background%20Actions" rel="noopener noreferrer" target="_blank">Background Actions</a> that check when a tiddler is added or removed from the feed and automatically send the update to github. Note that modifications done to a tiddler are not detected, so if you want to update the feed after editing a tiddler, remember to manually send the feed to github using the button, or let the plugin update the feed when a new tiddler is added or removed from the feed. This feature can be disabled in the plugin settings.</p>]]></content:encoded>
+	  <pubDate>Sun, 23 Aug 2026 21:00:37 GMT</pubDate>
+      <link>https://plugins.theophile.dev/#RSS%20Feed%20Plugin%200.0.4%3A%20Added%20auto%20upload%20feature</link>
+      <guid isPermaLink='true'>https://plugins.theophile.dev/#:%5Bcreated%5B20260822130618133%5D%5D</guid>
+</item><item>
+      <title>Announcing the RSS Feed Plugin</title>
+      <category>feed</category>
+      <description></description>
+      <content:encoded><![CDATA[<p>I am excited to announce the release of a <a class="tc-tiddlylink tc-tiddlylink-resolves" href="https://plugins.theophile.dev/#%24%3A%2Fplugins%2Ftheophile.dev%2Frss-feed">new plugin</a> designed to allow your audience to follow your wiki. This new tool automatically generates a valid RSS 2.0 feed directly from your specified tiddlers and pushes the file from your wiki, straight to GitHub.</p>]]></content:encoded>
+	  <pubDate>Fri, 21 Aug 2026 23:08:38 GMT</pubDate>
+      <link>https://plugins.theophile.dev/#Announcing%20the%20RSS%20Feed%20Plugin</link>
+      <guid isPermaLink='true'>https://plugins.theophile.dev/#:%5Bcreated%5B20260821223324326%5D%5D</guid>
+</item>
 </channel>
 </rss>
