@@ -6,13 +6,13 @@
   <link>https://plugin-library.tiddlyhost.com/</link>
   <description>a non-linear personal web notebook</description>
   <language>en-GB</language>
-  <lastBuildDate>Sun, 23 Aug 2026 00:18:07 GMT</lastBuildDate>
+  <lastBuildDate>Sun, 23 Aug 2026 21:00:37 GMT</lastBuildDate>
   <item>
       <title>RSS Feed Plugin 0.0.4: Added auto upload feature</title>
       <category>feed</category>
       <description></description>
-      <content:encoded><![CDATA[<p>The plugin now has a <a class="tc-tiddlylink-external" href="https://tiddlywiki.com/#Background%20Actions" rel="noopener noreferrer" target="_blank">Background Actions</a> that check when a tiddler is added or removed from the feed and automatically send the update to github. Note that modifications done to a tiddler are not detected, so if you want to update the feed after editing a tiddler, remember to manually send the feed to github using the button, or let the plugin update the feed when a new tiddler is added or removed from the feed. This feature can be disabled in the plugin settings.</p>]]></content:encoded>
-	  <pubDate>Sat, 22 Aug 2026 13:10:45 GMT</pubDate>
+      <content:encoded><![CDATA[<p><a class="tc-tiddlylink tc-tiddlylink-resolves" href="https://plugin-library.tiddlyhost.com/#%24%3A%2Fplugins%2Ftheophile.dev%2Frss-feed">The RSS Feed plugin</a> now has a <a class="tc-tiddlylink-external" href="https://tiddlywiki.com/#Background%20Actions" rel="noopener noreferrer" target="_blank">Background Actions</a> that check when a tiddler is added or removed from the feed and automatically send the update to github. Note that modifications done to a tiddler are not detected, so if you want to update the feed after editing a tiddler, remember to manually send the feed to github using the button, or let the plugin update the feed when a new tiddler is added or removed from the feed. This feature can be disabled in the plugin settings.</p>]]></content:encoded>
+	  <pubDate>Sun, 23 Aug 2026 21:00:37 GMT</pubDate>
       <link>https://plugin-library.tiddlyhost.com/#RSS%20Feed%20Plugin%200.0.4%3A%20Added%20auto%20upload%20feature</link>
       <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260822130618133%5D%5D</guid>
 </item><item>
