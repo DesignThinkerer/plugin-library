@@ -2,27 +2,38 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel>
   <atom:link href="https://DesignThinkerer.github.io/plugin-library/docs/xml.rss" rel="self" type="application/rss+xml" />
-  <title><![CDATA[Plugin library]]></title>
-  <link>https://plugins.theophile.dev/</link>
+  <title><![CDATA[Tiddlyhost Plugin Library]]></title>
+  <link>https://plugin-library.tiddlyhost.com/</link>
   <description>a non-linear personal web notebook</description>
   <language>en-GB</language>
-  <lastBuildDate>Sun, 23 Aug 2026 21:58:44 GMT</lastBuildDate>
+  <lastBuildDate>Mon, 24 Aug 2026 00:53:42 GMT</lastBuildDate>
   <item>
+      <title>Host-Agnostic Static TiddlyWiki Plugin Library</title>
+      <category>feed</category>
+      <description></description>
+      <content:encoded><![CDATA[<p>I have updated the architecture of my TiddlyWiki plugin library to support fully static hosting platforms like GitHub Pages, removing the dependency on server-specific backend endpoints.</p><p>Up until now, the plugin library typically relied on Tiddlyhost's JSON endpoints to serve plugin data. This new approach allows a plugin library to run anywhere (GitHub Pages, Tiddlyhost, etc) while maintaining full compatibility with any parent TiddlyWiki instance.</p><h3 class="">Key Technical Changes</h3><p>-   Host-Agnostic via <code>postMessage</code>: Communication between the parent wiki and the library iframe uses a secure <code>window.postMessage</code> bridge, allowing the library to be hosted statically without server-side routing.
+-   Startup Modules (<code>module-type: startup</code>): The library now uses a native TiddlyWiki startup module instead of manual script injection in the HTML head, ensuring clean execution timing during the boot sequence.
+-   In-Memory Retrieval: When a user requests a plugin, the library extracts the tiddler directly from the local in-memory store using <code>$tw.wiki.getTiddler()</code>, avoiding secondary network roundtrips.
+-   Native JavaScript Compilation: Metadata, readmes, and icons are processed and serialized in JavaScript. This replaces the previous wikitext macro approach, preventing parsing errors from unescaped quotes or missing SVG namespaces.</p><h3 class="">Links</h3><p>You can view the updated implementation and live library at: 👉 <a class="tc-tiddlylink-external" href="https://plugins.theophile.dev" rel="noopener noreferrer" target="_blank">https://plugins.theophile.dev</a></p><p>This approach will soon replace the current method used in this plugin library.</p>]]></content:encoded>
+	  <pubDate>Mon, 24 Aug 2026 00:53:42 GMT</pubDate>
+      <link>https://plugin-library.tiddlyhost.com/#Host-Agnostic%20Static%20TiddlyWiki%20Plugin%20Library</link>
+      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260824004856482%5D%5D</guid>
+</item><item>
       <title>RSS Feed Plugin 0.0.4: Added auto upload feature</title>
       <category>feed</category>
       <description></description>
-      <content:encoded><![CDATA[<p><a class="tc-tiddlylink tc-tiddlylink-resolves" href="https://plugins.theophile.dev/#%24%3A%2Fplugins%2Ftheophile.dev%2Frss-feed">The RSS Feed plugin</a> now has a <a class="tc-tiddlylink-external" href="https://tiddlywiki.com/#Background%20Actions" rel="noopener noreferrer" target="_blank">Background Actions</a> that check when a tiddler is added or removed from the feed and automatically send the update to github. Note that modifications done to a tiddler are not detected, so if you want to update the feed after editing a tiddler, remember to manually send the feed to github using the button, or let the plugin update the feed when a new tiddler is added or removed from the feed. This feature can be disabled in the plugin settings.</p>]]></content:encoded>
+      <content:encoded><![CDATA[<p><a class="tc-tiddlylink tc-tiddlylink-resolves" href="https://plugin-library.tiddlyhost.com/#%24%3A%2Fplugins%2Ftheophile.dev%2Frss-feed">The RSS Feed plugin</a> now has a <a class="tc-tiddlylink-external" href="https://tiddlywiki.com/#Background%20Actions" rel="noopener noreferrer" target="_blank">Background Actions</a> that check when a tiddler is added or removed from the feed and automatically send the update to github. Note that modifications done to a tiddler are not detected, so if you want to update the feed after editing a tiddler, remember to manually send the feed to github using the button, or let the plugin update the feed when a new tiddler is added or removed from the feed. This feature can be disabled in the plugin settings.</p>]]></content:encoded>
 	  <pubDate>Sun, 23 Aug 2026 21:00:37 GMT</pubDate>
-      <link>https://plugins.theophile.dev/#RSS%20Feed%20Plugin%200.0.4%3A%20Added%20auto%20upload%20feature</link>
-      <guid isPermaLink='true'>https://plugins.theophile.dev/#:%5Bcreated%5B20260822130618133%5D%5D</guid>
+      <link>https://plugin-library.tiddlyhost.com/#RSS%20Feed%20Plugin%200.0.4%3A%20Added%20auto%20upload%20feature</link>
+      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260822130618133%5D%5D</guid>
 </item><item>
       <title>Announcing the RSS Feed Plugin</title>
       <category>feed</category>
       <description></description>
-      <content:encoded><![CDATA[<p>I am excited to announce the release of a <a class="tc-tiddlylink tc-tiddlylink-resolves" href="https://plugins.theophile.dev/#%24%3A%2Fplugins%2Ftheophile.dev%2Frss-feed">new plugin</a> designed to allow your audience to follow your wiki. This new tool automatically generates a valid RSS 2.0 feed directly from your specified tiddlers and pushes the file from your wiki, straight to GitHub.</p>]]></content:encoded>
+      <content:encoded><![CDATA[<p>I am excited to announce the release of a <a class="tc-tiddlylink tc-tiddlylink-resolves" href="https://plugin-library.tiddlyhost.com/#%24%3A%2Fplugins%2Ftheophile.dev%2Frss-feed">new plugin</a> designed to allow your audience to follow your wiki. This new tool automatically generates a valid RSS 2.0 feed directly from your specified tiddlers and pushes the file from your wiki, straight to GitHub.</p>]]></content:encoded>
 	  <pubDate>Fri, 21 Aug 2026 23:08:38 GMT</pubDate>
-      <link>https://plugins.theophile.dev/#Announcing%20the%20RSS%20Feed%20Plugin</link>
-      <guid isPermaLink='true'>https://plugins.theophile.dev/#:%5Bcreated%5B20260821223324326%5D%5D</guid>
+      <link>https://plugin-library.tiddlyhost.com/#Announcing%20the%20RSS%20Feed%20Plugin</link>
+      <guid isPermaLink='true'>https://plugin-library.tiddlyhost.com/#:%5Bcreated%5B20260821223324326%5D%5D</guid>
 </item>
 </channel>
 </rss>
