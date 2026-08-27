@@ -1,4 +1,4 @@
-# GitHub Pages TiddlyWiki Plugin Library
+# Single File Library
 
 A lightweight, single file TiddlyWiki plugin library designed to run on static hosting platforms like GitHub Pages, Vercel, Netlify, or Tiddlyhost.
 
